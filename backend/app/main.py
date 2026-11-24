@@ -13,7 +13,8 @@ from app.routers import routers
 
 @asynccontextmanager
 async def lifespan(app: FastAPI) -> AsyncGenerator[None]:
-    await seed_database(async_session_maker)
+    if settings.seed_demo_data:
+        await seed_database(async_session_maker)
     yield
 
 

@@ -1,6 +1,10 @@
 .PHONY: docker-up
 docker-up:
-	docker compose up --build --wait
+	docker compose --env-file backend/.env up --build --wait
+
+.PHONY: docker-down
+docker-down:
+	docker compose --env-file backend/.env down
 
 .PHONY: run-back
 run-back:

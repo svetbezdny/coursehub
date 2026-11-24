@@ -4,15 +4,16 @@ services:
     env_file: ./backend/.env
     environment:
       COURSEHUB_ENVIRONMENT: docker
-      COURSEHUB_DATABASE_URL: sqlite+aiosqlite:////data/sqlite/coursehub.db
-    volumes:
-      - coursehub_data:/data
+      COURSEHUB_DATABASE_URL: ${COURSEHUB_POSTGRES_URL:?Set COURSEHUB_POSTGRES_URL}
     command:
       - /bin/sh
       - -ec
       - |
         alembic upgrade head
         exec python -m uvicorn app.main:app --host 0.0.0.0 --port 8000 --root-path /api
+    depends_on:
+      db:
+        condition: service_healthy
     healthcheck:
       test:
         - CMD
@@ -36,5 +37,19 @@ services:
         condition: service_healthy
     restart: unless-stopped
 
+  db:
+    image: postgres:16
+    environment:
+      POSTGRES_DB: ${POSTGRES_DB:?Set POSTGRES_DB}
+      POSTGRES_USER: ${POSTGRES_USER:?Set POSTGRES_USER}
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD:?Set POSTGRES_PASSWORD}
+    volumes:
+      - coursehub_pg_data:/var/lib/postgresql/data
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U coursehub -d coursehub"]
+      interval: 5s
+      timeout: 5s
+      retries: 5
+
 volumes:
-  coursehub_data:
+  coursehub_pg_data:

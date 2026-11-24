@@ -13,7 +13,7 @@ async_session_maker = async_sessionmaker(engine, expire_on_commit=False)
 
 
 async def check_database_connection(session: AsyncSession) -> None:
-    await session.execute(text("SELECT sqlite_version();"))
+    await session.execute(text("SELECT 1"))
 
 
 async def get_session() -> AsyncGenerator[AsyncSession]:

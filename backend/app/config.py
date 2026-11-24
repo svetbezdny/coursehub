@@ -13,6 +13,7 @@ class Settings(BaseSettings):
     access_token_expire_minutes: int = Field(default=30, gt=0)
 
     database_url: str = "sqlite+aiosqlite:///./coursehub.db"
+    seed_demo_data: bool = True
 
     request_id_header: str = "X-Request-ID"
 
