@@ -1,0 +1,40 @@
+services:
+  backend:
+    build: ./backend
+    env_file: ./backend/.env
+    environment:
+      COURSEHUB_ENVIRONMENT: docker
+      COURSEHUB_DATABASE_URL: sqlite+aiosqlite:////data/sqlite/coursehub.db
+    volumes:
+      - coursehub_data:/data
+    command:
+      - /bin/sh
+      - -ec
+      - |
+        alembic upgrade head
+        exec python -m uvicorn app.main:app --host 0.0.0.0 --port 8000 --root-path /api
+    healthcheck:
+      test:
+        - CMD
+        - python
+        - -c
+        - "from urllib.request import urlopen; urlopen('http://127.0.0.1:8000/health', timeout=2).close()"
+      interval: 10s
+      timeout: 3s
+      start_period: 15s
+      retries: 5
+    restart: unless-stopped
+
+  frontend:
+    build:
+      context: .
+      dockerfile: frontend/Dockerfile
+    ports:
+      - "127.0.0.1:8080:8080"
+    depends_on:
+      backend:
+        condition: service_healthy
+    restart: unless-stopped
+
+volumes:
+  coursehub_data:
