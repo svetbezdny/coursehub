@@ -4,7 +4,7 @@ from fastapi.testclient import TestClient
 def test_openapi_contains_current_coursehub_paths(client: TestClient) -> None:
     response = client.get("/openapi.json")
 
-    assert response.status_code == 200
+    assert response.status_code == 200, response.text
     paths = response.json()["paths"]
     expected_paths = {
         "/health",

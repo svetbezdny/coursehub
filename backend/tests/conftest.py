@@ -16,6 +16,8 @@ AUTHOR_EMAIL = "test_author@test.com"
 AUTHOR_PASSWORD = "test_author_password"
 STUDENT_EMAIL = "test_student@test.com"
 STUDENT_PASSWORD = "test_student_password"
+ADMIN_EMAIL = "test_admin@test.com"
+ADMIN_PASSWORD = "test_admin_password"
 
 
 @pytest.fixture
@@ -37,6 +39,11 @@ def client() -> Generator[TestClient]:
             async with testing_session_maker() as session:
                 session.add_all(
                     [
+                        User(
+                            email=ADMIN_EMAIL,
+                            role="admin",
+                            hashed_password=hash_password(ADMIN_PASSWORD),
+                        ),
                         User(
                             email=AUTHOR_EMAIL,
                             role="author",
@@ -82,6 +89,18 @@ def student_headers(client: TestClient) -> dict[str, str]:
     response = client.post(
         "/auth/login",
         json={"email": STUDENT_EMAIL, "password": STUDENT_PASSWORD},
+    )
+
+    assert response.status_code == 200, response.text
+    token = response.json()["access_token"]
+    return {"Authorization": f"Bearer {token}"}
+
+
+@pytest.fixture
+def admin_headers(client: TestClient) -> dict[str, str]:
+    response = client.post(
+        "/auth/login",
+        json={"email": ADMIN_EMAIL, "password": ADMIN_PASSWORD},
     )
 
     assert response.status_code == 200, response.text

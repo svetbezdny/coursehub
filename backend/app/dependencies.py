@@ -16,6 +16,7 @@ from app.repositories import (
     UserRepository,
 )
 from app.services import (
+    AdminService,
     AuthService,
     CourseService,
     LearningService,
@@ -86,6 +87,14 @@ async def require_author(
     return current_user
 
 
+async def require_admin(
+    current_user: Annotated[User, Depends(get_current_user)],
+) -> User:
+    if current_user.role != "admin":
+        raise PermissionDeniedError()
+    return current_user
+
+
 def get_enrollment_repository(
     session: Annotated[AsyncSession, Depends(get_session)],
 ) -> EnrollmentRepository:
@@ -126,10 +135,37 @@ def get_learning_service(
     )
 
 
+def get_admin_service(
+    course_repository: Annotated[CourseRepository, Depends(get_course_repository)],
+    lesson_repository: Annotated[LessonRepository, Depends(get_lesson_repository)],
+    user_repository: Annotated[UserRepository, Depends(get_user_repository)],
+    enrollment_repository: Annotated[
+        EnrollmentRepository, Depends(get_enrollment_repository)
+    ],
+    progress_repository: Annotated[
+        ProgressRepository, Depends(get_progress_repository)
+    ],
+    favorite_repository: Annotated[
+        FavoriteRepository, Depends(get_favorite_repository)
+    ],
+) -> AdminService:
+    return AdminService(
+        course_repository,
+        lesson_repository,
+        user_repository,
+        enrollment_repository,
+        progress_repository,
+        favorite_repository,
+    )
+
+
 CourseServiceDep = Annotated[CourseService, Depends(get_course_service)]
 LessonServiceDep = Annotated[LessonService, Depends(get_lesson_service)]
 UserServiceDep = Annotated[UserService, Depends(get_user_service)]
 AuthServiceDep = Annotated[AuthService, Depends(get_auth_service)]
-AuthorDep = Annotated[User, Depends(require_author)]
 CurrentUserDep = Annotated[User, Depends(get_current_user)]
 LearningServiceDep = Annotated[LearningService, Depends(get_learning_service)]
+AdminServiceDep = Annotated[AdminService, Depends(get_admin_service)]
+
+AuthorDep = Annotated[User, Depends(require_author)]
+AdminDep = Annotated[User, Depends(require_admin)]

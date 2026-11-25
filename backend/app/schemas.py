@@ -104,3 +104,12 @@ class FavoriteRead(BaseModel):
     user_id: int
     course_id: int
     course_title: str
+
+
+class AdminStatsRead(BaseModel):
+    courses: int
+    lessons: int
+    users: int
+    enrollments: int
+    completed_lessons: int
+    favorite_courses: int

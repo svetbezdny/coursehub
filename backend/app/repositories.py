@@ -47,6 +47,9 @@ class CourseRepository:
         await self.session.refresh(course)
         return course
 
+    async def count(self) -> int:
+        return int(await self.session.scalar(select(func.count(Course.id))) or 0)
+
 
 class LessonRepository:
     def __init__(self, session: AsyncSession) -> None:
@@ -82,6 +85,9 @@ class LessonRepository:
         stmt = select(func.count(Lesson.id)).where(Lesson.course_id == course_id)
         return int(await self.session.scalar(stmt) or 0)
 
+    async def count(self) -> int:
+        return int(await self.session.scalar(select(func.count(Lesson.id))) or 0)
+
 
 class UserRepository:
     def __init__(self, session: AsyncSession) -> None:
@@ -107,6 +113,9 @@ class UserRepository:
         await self.session.commit()
         await self.session.refresh(user)
         return user
+
+    async def count(self) -> int:
+        return int(await self.session.scalar(select(func.count(User.id))) or 0)
 
 
 class EnrollmentRepository:
@@ -138,6 +147,9 @@ class EnrollmentRepository:
         )
         result = await self.session.execute(stmt)
         return [(e, c) for e, c in result.all()]
+
+    async def count(self) -> int:
+        return int(await self.session.scalar(select(func.count(Enrollment.id))) or 0)
 
 
 class ProgressRepository:
@@ -176,6 +188,12 @@ class ProgressRepository:
         result = await self.session.scalars(stmt)
         return list(result)
 
+    async def count_completed(self) -> int:
+        stmt = select(func.count(LessonProgress.id)).where(
+            LessonProgress.completed.is_(True)
+        )
+        return int(await self.session.scalar(stmt) or 0)
+
 
 class FavoriteRepository:
     def __init__(self, session: AsyncSession) -> None:
@@ -212,3 +230,8 @@ class FavoriteRepository:
         )
         await self.session.execute(stmt)
         await self.session.commit()
+
+    async def count(self) -> int:
+        return int(
+            await self.session.scalar(select(func.count(FavoriteCourse.id))) or 0
+        )

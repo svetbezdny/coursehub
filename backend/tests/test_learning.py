@@ -11,7 +11,7 @@ def test_student_can_enroll_in_course(
     assert response.status_code == 201, response.text
     assert response.json() == {
         "id": 1,
-        "user_id": 2,
+        "user_id": 3,
         "course_id": 1,
         "course_title": DEFAULT_COURSES[0]["title"],
     }

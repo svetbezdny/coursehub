@@ -5,6 +5,7 @@ import { Route, Routes, useLocation } from "react-router";
 import { useAuth } from "./auth/useAuth";
 import SiteHeader from "./components/SiteHeader";
 import EnrollmentsProvider from "./learning/EnrollmentsProvider";
+import AdminPage from "./pages/AdminPage";
 import CoursePage from "./pages/CoursePage";
 import CoursesPage from "./pages/CoursesPage";
 import CreateCoursePage from "./pages/CreateCoursePage";
@@ -39,6 +40,9 @@ function App() {
 				<Route path="/login" element={<LoginPage />} />
 				<Route path="/register" element={<RegisterPage />} />
 				<Route path="/my-courses" element={<MyCoursesPage />} />
+				{user?.role === "admin" && (
+					<Route path="/admin" element={<AdminPage />} />
+				)}
 				<Route path="*" element={<NotFoundPage />} />
 			</Routes>
 		</EnrollmentsProvider>

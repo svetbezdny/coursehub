@@ -405,3 +405,27 @@
 	+ .favorite-hint {
 	visibility: visible;
 }
+
+.admin-stats {
+	display: grid;
+	grid-template-columns: repeat(auto-fit, minmax(min(100%, 180px), 1fr));
+	gap: 16px;
+	margin: 24px 0 0;
+}
+
+.admin-stats > div {
+	padding: 20px;
+	border: 1px solid #e2e8f0;
+	border-radius: 16px;
+	background: #fff;
+}
+
+.admin-stats dt {
+	color: #475569;
+}
+
+.admin-stats dd {
+	margin: 8px 0 0;
+	font-size: 32px;
+	font-weight: 700;
+}

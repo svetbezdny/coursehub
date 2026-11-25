@@ -20,6 +20,7 @@ from app.repositories import (
     UserRepository,
 )
 from app.schemas import (
+    AdminStatsRead,
     CourseCreate,
     CourseLevel,
     CourseProgressRead,
@@ -308,3 +309,31 @@ class LearningService:
         if course is None:
             raise CourseNotFoundError()
         return course
+
+
+class AdminService:
+    def __init__(
+        self,
+        course_repository: CourseRepository,
+        lesson_repository: LessonRepository,
+        user_repository: UserRepository,
+        enrollment_repository: EnrollmentRepository,
+        progress_repository: ProgressRepository,
+        favorite_repository: FavoriteRepository,
+    ) -> None:
+        self.course_repository = course_repository
+        self.lesson_repository = lesson_repository
+        self.user_repository = user_repository
+        self.enrollment_repository = enrollment_repository
+        self.progress_repository = progress_repository
+        self.favorite_repository = favorite_repository
+
+    async def get_stats(self) -> AdminStatsRead:
+        return AdminStatsRead(
+            courses=await self.course_repository.count(),
+            lessons=await self.lesson_repository.count(),
+            users=await self.user_repository.count(),
+            enrollments=await self.enrollment_repository.count(),
+            completed_lessons=await self.progress_repository.count_completed(),
+            favorite_courses=await self.favorite_repository.count(),
+        )

@@ -16,6 +16,7 @@ function AuthActions() {
 					<Link to={"/my-courses"} title="Мои курсы">
 						{user.full_name || user.email}
 					</Link>
+					{user.role === "admin" && <Link to="/admin">Статистика</Link>}
 					<button className="secondary-button" type="button" onClick={signOut}>
 						Выйти
 					</button>
