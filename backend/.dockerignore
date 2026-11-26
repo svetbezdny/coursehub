@@ -10,3 +10,5 @@ tests/
 *.db-wal
 *.db-shm
 *.db-journal
+.coverage
+.coverage.*
