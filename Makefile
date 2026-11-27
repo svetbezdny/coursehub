@@ -6,9 +6,15 @@ docker-up:
 docker-down:
 	docker compose --env-file backend/.env down
 
+
 .PHONY: run-back
 run-back:
 	uv run --directory backend uvicorn app.main:app --reload
+
+.PHONY: run-front
+run-front:
+	npm --prefix frontend run dev
+
 
 .PHONY: test-back
 test-back:

@@ -52,3 +52,11 @@ class EnrollmentRequiredError(CourseHubError):
 
 class FavoriteAlreadyExistsError(CourseHubError):
     detail = "Course is already in favorites"
+
+
+class ReviewEnrollmentRequiredError(CourseHubError):
+    detail = "Enroll in course before leaving a review"
+
+
+class ReviewAlreadyExistsError(CourseHubError):
+    detail = "Review already exists for this course"

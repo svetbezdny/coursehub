@@ -85,6 +85,10 @@ function AdminPage() {
 						<dt>Добавления в избранное</dt>
 						<dd>{stats.favorite_courses}</dd>
 					</div>
+					<div>
+						<dt>Рецензии</dt>
+						<dd>{stats.reviews}</dd>
+					</div>
 				</dl>
 			)}
 		</main>

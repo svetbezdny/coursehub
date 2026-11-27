@@ -113,3 +113,17 @@ class AdminStatsRead(BaseModel):
     enrollments: int
     completed_lessons: int
     favorite_courses: int
+    reviews: int
+
+
+class ReviewCreate(BaseModel):
+    rating: int = Field(ge=1, le=5)
+    comment: str | None = Field(default=None, max_length=500)
+
+
+class ReviewRead(BaseModel):
+    id: int
+    course_id: int
+    user_id: int
+    rating: int
+    comment: str | None

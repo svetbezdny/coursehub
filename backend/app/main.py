@@ -3,6 +3,7 @@ from contextlib import asynccontextmanager
 from uuid import uuid4
 
 from fastapi import FastAPI, Request, Response
+from fastapi.responses import RedirectResponse
 from starlette.types import Lifespan
 
 from app.config import settings
@@ -25,6 +26,10 @@ def create_app(*, lifespan_handler: Lifespan[FastAPI] = lifespan) -> FastAPI:
         version=settings.app_version,
         lifespan=lifespan_handler,
     )
+
+    @app.get("/", include_in_schema=False)
+    async def docs_redirect():
+        return RedirectResponse(url="/docs")
 
     @app.middleware("http")
     async def add_request_id(

@@ -22,5 +22,6 @@ def test_openapi_contains_current_coursehub_paths(client: TestClient) -> None:
         "/me/progress",
         "/courses/{course_id}/favorite",
         "/me/favorites",
+        "/courses/{course_id}/reviews",
     }
     assert expected_paths.issubset(paths)

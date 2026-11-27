@@ -8,6 +8,8 @@ from app.errors import (
     InvalidCredentialsError,
     InvalidTokenError,
     LessonNotFoundError,
+    ReviewAlreadyExistsError,
+    ReviewEnrollmentRequiredError,
     SearchQueryTooShortError,
 )
 from app.models import Course, Lesson, User
@@ -17,6 +19,7 @@ from app.repositories import (
     FavoriteRepository,
     LessonRepository,
     ProgressRepository,
+    ReviewRepository,
     UserRepository,
 )
 from app.schemas import (
@@ -29,6 +32,8 @@ from app.schemas import (
     FavoriteRead,
     LessonCreate,
     LessonProgressRead,
+    ReviewCreate,
+    ReviewRead,
     TokenRead,
     UserCreate,
     UserLogin,
@@ -320,6 +325,7 @@ class AdminService:
         enrollment_repository: EnrollmentRepository,
         progress_repository: ProgressRepository,
         favorite_repository: FavoriteRepository,
+        review_repository: ReviewRepository,
     ) -> None:
         self.course_repository = course_repository
         self.lesson_repository = lesson_repository
@@ -327,6 +333,7 @@ class AdminService:
         self.enrollment_repository = enrollment_repository
         self.progress_repository = progress_repository
         self.favorite_repository = favorite_repository
+        self.review_repository = review_repository
 
     async def get_stats(self) -> AdminStatsRead:
         return AdminStatsRead(
@@ -336,4 +343,64 @@ class AdminService:
             enrollments=await self.enrollment_repository.count(),
             completed_lessons=await self.progress_repository.count_completed(),
             favorite_courses=await self.favorite_repository.count(),
+            reviews=await self.review_repository.count(),
         )
+
+
+class ReviewService:
+    def __init__(
+        self,
+        course_repository: CourseRepository,
+        enrollment_repository: EnrollmentRepository,
+        review_repository: ReviewRepository,
+    ) -> None:
+        self.course_repository = course_repository
+        self.enrollment_repository = enrollment_repository
+        self.review_repository = review_repository
+
+    async def create_review(
+        self, *, course_id: int, user: User, review_in: ReviewCreate
+    ) -> ReviewRead:
+        course = await self.course_repository.get_by_id(course_id)
+        if course is None:
+            raise CourseNotFoundError()
+
+        enrollment = await self.enrollment_repository.get(
+            user_id=user.id, course_id=course_id
+        )
+        if enrollment is None:
+            raise ReviewEnrollmentRequiredError()
+
+        existing_review = await self.review_repository.get(
+            user_id=user.id, course_id=course_id
+        )
+        if existing_review is not None:
+            raise ReviewAlreadyExistsError()
+
+        review = await self.review_repository.create(
+            user_id=user.id, course_id=course_id, review_in=review_in
+        )
+        return ReviewRead(
+            id=review.id,
+            course_id=review.course_id,
+            user_id=review.user_id,
+            rating=review.rating,
+            comment=review.comment,
+        )
+
+    async def list_course_reviews(self, course_id: int) -> list[ReviewRead]:
+        course = await self.course_repository.get_by_id(course_id)
+        if course is None:
+            raise CourseNotFoundError()
+
+        reviews = await self.review_repository.list_by_course(course_id=course_id)
+        return [
+            ReviewRead(
+                id=review.id,
+                course_id=review.course_id,
+                user_id=review.user_id,
+                rating=review.rating,
+                comment=review.comment,
+            )
+            for review in reviews
+        ]

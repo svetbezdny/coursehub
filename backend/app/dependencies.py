@@ -13,6 +13,7 @@ from app.repositories import (
     FavoriteRepository,
     LessonRepository,
     ProgressRepository,
+    ReviewRepository,
     UserRepository,
 )
 from app.services import (
@@ -21,6 +22,7 @@ from app.services import (
     CourseService,
     LearningService,
     LessonService,
+    ReviewService,
     UserService,
 )
 
@@ -33,16 +35,40 @@ def get_course_repository(
     return CourseRepository(session)
 
 
-def get_course_service(
-    repository: Annotated[CourseRepository, Depends(get_course_repository)],
-) -> CourseService:
-    return CourseService(repository)
-
-
 def get_lesson_repository(
     session: Annotated[AsyncSession, Depends(get_session)],
 ) -> LessonRepository:
     return LessonRepository(session)
+
+
+def get_user_repository(
+    session: Annotated[AsyncSession, Depends(get_session)],
+) -> UserRepository:
+    return UserRepository(session)
+
+
+def get_enrollment_repository(
+    session: Annotated[AsyncSession, Depends(get_session)],
+) -> EnrollmentRepository:
+    return EnrollmentRepository(session)
+
+
+def get_progress_repository(
+    session: Annotated[AsyncSession, Depends(get_session)],
+) -> ProgressRepository:
+    return ProgressRepository(session)
+
+
+def get_favorite_repository(
+    session: Annotated[AsyncSession, Depends(get_session)],
+) -> FavoriteRepository:
+    return FavoriteRepository(session)
+
+
+def get_review_repository(
+    session: Annotated[AsyncSession, Depends(get_session)],
+) -> ReviewRepository:
+    return ReviewRepository(session)
 
 
 def get_lesson_service(
@@ -52,10 +78,10 @@ def get_lesson_service(
     return LessonService(course_repository, lesson_repository)
 
 
-def get_user_repository(
-    session: Annotated[AsyncSession, Depends(get_session)],
-) -> UserRepository:
-    return UserRepository(session)
+def get_course_service(
+    repository: Annotated[CourseRepository, Depends(get_course_repository)],
+) -> CourseService:
+    return CourseService(repository)
 
 
 def get_user_service(
@@ -95,24 +121,6 @@ async def require_admin(
     return current_user
 
 
-def get_enrollment_repository(
-    session: Annotated[AsyncSession, Depends(get_session)],
-) -> EnrollmentRepository:
-    return EnrollmentRepository(session)
-
-
-def get_progress_repository(
-    session: Annotated[AsyncSession, Depends(get_session)],
-) -> ProgressRepository:
-    return ProgressRepository(session)
-
-
-def get_favorite_repository(
-    session: Annotated[AsyncSession, Depends(get_session)],
-) -> FavoriteRepository:
-    return FavoriteRepository(session)
-
-
 def get_learning_service(
     course_repository: Annotated[CourseRepository, Depends(get_course_repository)],
     lesson_repository: Annotated[LessonRepository, Depends(get_lesson_repository)],
@@ -148,6 +156,7 @@ def get_admin_service(
     favorite_repository: Annotated[
         FavoriteRepository, Depends(get_favorite_repository)
     ],
+    review_repository: Annotated[ReviewRepository, Depends(get_review_repository)],
 ) -> AdminService:
     return AdminService(
         course_repository,
@@ -156,6 +165,21 @@ def get_admin_service(
         enrollment_repository,
         progress_repository,
         favorite_repository,
+        review_repository,
+    )
+
+
+def get_review_service(
+    course_repository: Annotated[CourseRepository, Depends(get_course_repository)],
+    enrollment_repository: Annotated[
+        EnrollmentRepository, Depends(get_enrollment_repository)
+    ],
+    review_repository: Annotated[ReviewRepository, Depends(get_review_repository)],
+) -> ReviewService:
+    return ReviewService(
+        course_repository,
+        enrollment_repository,
+        review_repository,
     )
 
 
@@ -166,6 +190,7 @@ AuthServiceDep = Annotated[AuthService, Depends(get_auth_service)]
 CurrentUserDep = Annotated[User, Depends(get_current_user)]
 LearningServiceDep = Annotated[LearningService, Depends(get_learning_service)]
 AdminServiceDep = Annotated[AdminService, Depends(get_admin_service)]
+ReviewServiceDep = Annotated[ReviewService, Depends(get_review_service)]
 
 AuthorDep = Annotated[User, Depends(require_author)]
 AdminDep = Annotated[User, Depends(require_admin)]

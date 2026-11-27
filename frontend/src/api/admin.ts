@@ -7,6 +7,7 @@ export type AdminStats = {
 	enrollments: number;
 	completed_lessons: number;
 	favorite_courses: number;
+	reviews: number;
 };
 
 export async function getAdminStats(token: string): Promise<AdminStats> {

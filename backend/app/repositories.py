@@ -3,8 +3,16 @@ from typing import Any
 from sqlalchemy import delete, func, select
 from sqlalchemy.ext.asyncio import AsyncSession
 
-from app.models import Course, Enrollment, FavoriteCourse, Lesson, LessonProgress, User
-from app.schemas import CourseCreate, LessonCreate, UserCreate
+from app.models import (
+    Course,
+    Enrollment,
+    FavoriteCourse,
+    Lesson,
+    LessonProgress,
+    Review,
+    User,
+)
+from app.schemas import CourseCreate, LessonCreate, ReviewCreate, UserCreate
 
 
 class CourseRepository:
@@ -235,3 +243,31 @@ class FavoriteRepository:
         return int(
             await self.session.scalar(select(func.count(FavoriteCourse.id))) or 0
         )
+
+
+class ReviewRepository:
+    def __init__(self, session: AsyncSession) -> None:
+        self.session = session
+
+    async def get(self, *, user_id: int, course_id: int) -> Review | None:
+        stmt = select(Review).where(
+            Review.user_id == user_id, Review.course_id == course_id
+        )
+        return await self.session.scalar(stmt)
+
+    async def create(
+        self, *, user_id: int, course_id: int, review_in: ReviewCreate
+    ) -> Review:
+        review = Review(user_id=user_id, course_id=course_id, **review_in.model_dump())
+        self.session.add(review)
+        await self.session.commit()
+        await self.session.refresh(review)
+        return review
+
+    async def list_by_course(self, course_id: int) -> list[Review]:
+        stmt = select(Review).where(Review.course_id == course_id).order_by(Review.id)
+        result = await self.session.scalars(stmt)
+        return list(result)
+
+    async def count(self) -> int:
+        return int(await self.session.scalar(select(func.count(Review.id))) or 0)
